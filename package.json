@@ -10,7 +10,10 @@
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
     "react-scripts": "3.2.0",
-    "typescript": "3.6.4"
+    "typescript": "3.6.4",
+    "grapesjs": "0.15.8",
+    "grapesjs-react": "2.0.2",
+    "react-compound-timer": "^1.1.15"
   },
   "scripts": {
     "start": "react-scripts start",
