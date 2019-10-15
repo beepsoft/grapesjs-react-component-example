@@ -62,8 +62,9 @@ export default function (editor, opt = {}) {
             isComponent(el) {
                 console.log('isComponent', el);
                 //debugger;
-                if (el.getAttribute &&
-                    el.getAttribute('data-gjs-type') == timerRef) {
+                if ((el.getAttribute && el.getAttribute('data-gjs-type') == timerRef)
+                || (el.attributes && el.attributes['data-gjs-type'] == timerRef)) {
+                    console.log('isComponent', "yes");
                     return {
                         type: timerRef
                     };
@@ -139,11 +140,17 @@ export default function (editor, opt = {}) {
                 const comps = this.model.get('components');
                 comps.reset();
                 comps.add(`<span className="timer-label">${this.model.attributes.timerLabel}</span>`);
-               //comps.add(`<Timer initialTime="${initialTime}"/>`);
+
+                // TODO: JSX expressions are not parsed yet
+                // const compString = `<Timer
+                //             `+(direction=="backward" ? `initialTime="${initialTime}"` : "")+
+                //     `direction="${direction}"
+                //             formatValue={(value) => \`\${(value < 10 ? \`0\${value}\` : value)}\`}
+                //         >
 
                 const compString = `<Timer
-                            initialTime="${initialTime}"
-                            direction="${direction}"
+                            `+(direction=="backward" ? `initialTime="${initialTime}"` : "")+
+                            `direction="${direction}"                            
                         >
                         <span className="timer-days">
                             <Timer.Days/>${this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelDays+" " : ', '}

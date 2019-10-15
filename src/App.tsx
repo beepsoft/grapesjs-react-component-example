@@ -12,7 +12,7 @@ import Timer from "react-compound-timer";
 const App: React.FC = () => {
 
     const [htmlString, setHtmlString] = useState(null);
-    const [cssString, setCssString] = useState(null);
+    const [cssString, setCssString] = useState("");
     const [pluginLoaded, setPluginLoaded] = useState(false);
 
     if (!pluginLoaded) {
@@ -25,7 +25,7 @@ const App: React.FC = () => {
     return (
         <>
             <GEditor id="geditor" plugins={[timerPluginRef]}/>
-            <TemplateDisplay htmlString={htmlString} cssString={""} />
+            <TemplateDisplay htmlString={htmlString} cssString={cssString} />
         </>
     );
 }

@@ -9,7 +9,7 @@ import loadComponents from './components';
 import loadBlocks from './blocks';
 import loadCommands from './commands';
 import loadPanels from './panels';
-import myParserHtml from './htmlParser';
+import parserHtmlCaseSensitive from './ParserHtmlCaseSensitive';
 
 import {
     timerRef,
@@ -82,20 +82,19 @@ export default function addTimerPlugin(setHtmlString, setCssString) {
         // Load panels
         loadPanels(editor, c);
 
-        // HACK: we need to replace the default HTML parser with out own, so that things won't be lowercased
-        editor.on("load", () => {
-            const em = editor.getModel();
-            const emConf = em.get('Config');
-            // This needs to be handset (in GrapesJS it comes from parser/config/config.js)
-            emConf.textTags = ['br', 'b', 'i', 'u', 'a', 'ul', 'ol'];
-            em.get('Parser').parserHtml = myParserHtml(emConf);
-            em.get('Parser').parseHtml = (str) => {
-                const pHtml = em.get('Parser').parserHtml;
-                //pHtml.compTypes = em ? em.get('DomComponents').getTypes() : compTypes;
-                pHtml.compTypes = em.get('DomComponents').getTypes();
-                return pHtml.parse(str, em.get('Parser').parserCss);
-            };
-        });
+        // HACK: we need to replace the default HTML parser with our own, so that things won't be lowercased
+        // grapesjs doesn't have a public API to provide a custom html parser
+        const em = editor.getModel();
+        const emConf = em.get('Config');
+        // This needs to be handset (in GrapesJS it comes from parser/config/config.js)
+        emConf.textTags = ['br', 'b', 'i', 'u', 'a', 'ul', 'ol'];
+        em.get('Parser').parserHtml = parserHtmlCaseSensitive(emConf);
+        em.get('Parser').parseHtml = (str) => {
+            const pHtml = em.get('Parser').parserHtml;
+            //pHtml.compTypes = em ? em.get('DomComponents').getTypes() : compTypes;
+            pHtml.compTypes = em.get('DomComponents').getTypes();
+            return pHtml.parse(str, em.get('Parser').parserCss);
+        };
     });
 }
 

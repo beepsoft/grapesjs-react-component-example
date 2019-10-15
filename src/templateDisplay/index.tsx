@@ -4,6 +4,9 @@ import JsxParser from "react-jsx-parser";
 import Timer from "react-compound-timer";
 
 const TemplateDisplay = ({htmlString, cssString}) => {
+
+
+
     return (
         <>
             AAAA

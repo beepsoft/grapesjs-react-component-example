@@ -1,5 +1,18 @@
 import { each, isString } from 'underscore';
+import { parse as nodeHtmlParser } from "node-html-parser";
 
+/**
+ * Parses an HTML string into its HTML and CSS component representation keeping case of tags and attributes. This
+ * is necessary in case you want React compatible JSX tags in the template, in which case the react components must start
+ * wih uppercase and also the camel casing of attributes is importane (ie. className vs classname)
+ *
+ * This function is based on src/parser/model/ParserHtml.js. For parsing we are using node-html-parser instead of
+ * the browser's DOM to keep the case of tags and attributes. The code is mostly the same  as in ParserHtml.js
+ * by maing the objects created by  node-html-parser compatible with the DOM representation.
+ *
+ * @param config usual grapesjs config
+ * @returns parser function
+ */
 export default config => {
     var TEXT_NODE = 'span';
     var c = config;
@@ -96,6 +109,14 @@ export default config => {
             return result;
         },
 
+        toAttrArray(obj){
+            var attrArr = [];
+            Object.keys(obj).map(key => {
+                attrArr.push({'nodeName':key, 'nodeValue':obj[key]})
+            })
+            return attrArr;
+        },
+
         /**
          * Get data from the node element
          * @param  {HTMLElement} el DOM element to traverse
@@ -107,8 +128,18 @@ export default config => {
 
             for (var i = 0, len = nodes.length; i < len; i++) {
                 const node = nodes[i];
-                const attrs = node.attributes || [];
-                const attrsLen = attrs.length;
+
+                // DOM copmatibility
+                node.nodeValue = node.rawText;
+                node.content = node.rawText;
+
+                // Make attrs compatible with DOM representation
+                let attrs = [];
+                    attrs = (typeof node.attributes == 'object'
+                        ? this.toAttrArray(node.attributes)
+                        :  node.attributes)
+                        || []
+                    const attrsLen = attrs.length;
                 const nodePrev = result[result.length - 1];
                 const nodeChild = node.childNodes.length;
                 const ct = this.compTypes;
@@ -119,6 +150,9 @@ export default config => {
                     let obj = '';
                     let type =
                         node.getAttribute && node.getAttribute(`${modelAttrStart}type`);
+                    if (!type) {
+                        type = node.attributes && node.attributes[`${modelAttrStart}type`];
+                    }
 
                     // If the type is already defined, use it
                     if (type) {
@@ -142,10 +176,8 @@ export default config => {
                     }
                 }
 
-                // Set tag name if not yet done
-                if (!model.tagName) {
-                    model.tagName = node.tagName;// ? node.tagName.toLowerCase() : '';
-                }
+                // Use tagName as is, no lowercasing
+                model.tagName = node.tagName;
 
                 if (attrsLen) {
                     model.attributes = {};
@@ -155,6 +187,9 @@ export default config => {
                 for (let j = 0; j < attrsLen; j++) {
                     const nodeName = attrs[j].nodeName;
                     let nodeValue = attrs[j].nodeValue;
+                    // if (nodeName == "formatValue") {
+                    //     debugger;
+                    // }
 
                     // Isolate attributes
                     if (nodeName == 'style') {
@@ -205,6 +240,9 @@ export default config => {
 
                 // Check if it's a text node and if could be moved to the prevous model
                 if (model.type == 'textnode') {
+                    // this had to be added ...
+                    model.content = node.nodeValue;
+
                     if (nodePrev && nodePrev.type == 'textnode') {
                         nodePrev.content += model.content;
                         continue;
@@ -266,20 +304,23 @@ export default config => {
          * @return {Object}
          */
         parse(str, parserCss) {
+            console.log("html", str, parserCss);
+            console.log("html", str);
+
             var config = (c.em && c.em.get('Config')) || {};
             var res = { html: '', css: '' };
-            var el = document.createElement('div');
-            el.innerHTML = str;
-            var scripts = el.querySelectorAll('script');
-            var i = scripts.length;
 
-            // Remove all scripts
-            if (!config.allowScripts) {
-                while (i--) scripts[i].parentNode.removeChild(scripts[i]);
-            }
+            const dom = nodeHtmlParser(str);
+            var result = this.parseNode(dom);
 
-            // Detach style tags and parse them
+            if (result.length == 1) result = result[0];
+            res.html = result;
+
+            // // Detach style tags and parse them
+            // Note: this is parsed via the actual DOM
             if (parserCss) {
+                var el = document.createElement('div');
+                el.innerHTML = str;
                 var styleStr = '';
                 var styles = el.querySelectorAll('style');
                 var j = styles.length;
@@ -292,14 +333,7 @@ export default config => {
                 if (styleStr) res.css = parserCss.parse(styleStr);
             }
 
-            var result = this.parseNode(el);
-
-            if (result.length == 1) result = result[0];
-
-            res.html = result;
-
-            console.log("result", res);
-
+            console.log("parsed html", res);
             return res;
         }
     };
