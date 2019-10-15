@@ -139,7 +139,26 @@ export default function (editor, opt = {}) {
                 const comps = this.model.get('components');
                 comps.reset();
                 comps.add(`<span className="timer-label">${this.model.attributes.timerLabel}</span>`);
-                comps.add(`<Timer initialTime="${initialTime}"/>`);
+               //comps.add(`<Timer initialTime="${initialTime}"/>`);
+
+                const compString = `<Timer
+                            initialTime="${initialTime}"
+                            direction="${direction}"
+                        >
+                        <span className="timer-days">
+                            <Timer.Days/>${this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelDays+" " : ', '}
+                        </span>
+                        <span className="timer-hours">
+                            <Timer.Hours/>${this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelHours+" " : ':'}
+                        </span>
+                            <span className="timer-minutes">
+                            <Timer.Minutes/>${this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelMinutes+" " : ':'}
+                        </span>
+                            <span className="timer-seconds">
+                            <Timer.Seconds/>${this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelSeconds : ''}
+                        </span>
+                        </Timer>`;
+                comps.add(compString);
 
                 // And this will be the "live" view of the timer. How this live view relates to the actual
                 // JSQ generated as the component is left to you. In theory the same JSX that is generated here below

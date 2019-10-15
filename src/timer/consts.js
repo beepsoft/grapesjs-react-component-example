@@ -4,3 +4,6 @@ export const timerRef = 'timer';
 
 // The plugin's reference. Must be passed to <GEditor plugins=[{...}]/>
 export const timerPluginRef = 'timer-plugin';
+
+
+export const loadHtmltemplate = 'load-html-template';
