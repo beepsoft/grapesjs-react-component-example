@@ -19,7 +19,6 @@ import Timer from 'react-compound-timer';
 import {timerRef} from "./consts";
 
 export default function (editor, opt = {}) {
-    console.log("opt", opt);
     const c = opt;
     const domc = editor.DomComponents;
     const defaultType = domc.getType('default');
@@ -60,11 +59,10 @@ export default function (editor, opt = {}) {
             },
         }, {
             isComponent(el) {
-                console.log('isComponent', el);
+                //console.log('isComponent', el);
                 //debugger;
                 if ((el.getAttribute && el.getAttribute('data-gjs-type') == timerRef)
                 || (el.attributes && el.attributes['data-gjs-type'] == timerRef)) {
-                    console.log('isComponent', "yes");
                     return {
                         type: timerRef
                     };
@@ -137,20 +135,20 @@ export default function (editor, opt = {}) {
                 //
                 // And the matching 'gjs-html' will have:
                 // <timer initialtime="1688547182"></timer>
+
+                //
+                // Add practically the same JSX as the component. Note: the only real difference is that formatValue
+                // attruibute calls a "formatValue" function that will be provided by the JsxParser (with the same
+                // function as in the react component below.
+                //
                 const comps = this.model.get('components');
                 comps.reset();
                 comps.add(`<span className="timer-label">${this.model.attributes.timerLabel}</span>`);
-
-                // TODO: JSX expressions are not parsed yet
-                // const compString = `<Timer
-                //             `+(direction=="backward" ? `initialTime="${initialTime}"` : "")+
-                //     `direction="${direction}"
-                //             formatValue={(value) => \`\${(value < 10 ? \`0\${value}\` : value)}\`}
-                //         >
-
-                const compString = `<Timer
-                            `+(direction=="backward" ? `initialTime="${initialTime}"` : "")+
-                            `direction="${direction}"                            
+                const compString =
+                    `<Timer
+                            `+(direction=="backward" ? `initialTime="${initialTime}"` : "")+`
+                            direction="${direction}"
+                            formatValue={formatValue}
                         >
                         <span className="timer-days">
                             <Timer.Days/>${this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelDays+" " : ', '}

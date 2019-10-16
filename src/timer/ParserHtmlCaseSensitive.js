@@ -1,5 +1,6 @@
 import { each, isString } from 'underscore';
 import { parse as nodeHtmlParser } from "node-html-parser";
+import XRegExp from "xregexp";
 
 /**
  * Parses an HTML string into its HTML and CSS component representation keeping case of tags and attributes. This
@@ -64,6 +65,113 @@ export default config => {
                 attrs
             };
         },
+
+        /**
+         * Given a string with html (jsx). Attributes having JSX expressions will be quoted to look like
+         * actual HTML attributes
+         * @param {*} html
+         * @return html with quoted JSX attributes
+         *
+         * https://stackoverflow.com/questions/546433/regular-expression-to-match-balanced-parentheses
+         */
+        quoteJsxExpresionsInAttributes(html) {
+            let found = XRegExp.matchRecursive(html, "{", "}", "g");
+            for (let i = 0; i < found.length; i++) {
+                // (value) => \`\${(value) => < 10 ? \`0\${value}\` : value)}\`
+                // --> {(value) => \`\${(value) => < 10 ? \`0\${value}\` : value)}\`}
+                let pattern = "{" + found[i] + "}";
+                let lastStartPos = 0;
+                // Find pattern until we reach and of html
+                while (true) {
+                    let needsQuote = false;
+                    // get next match position
+                    let matchPos = html.indexOf(pattern, lastStartPos);
+                    if (matchPos === -1) {
+                        break;
+                    }
+                    // We will look back 1 and 2 characters
+                    let oneCharBeforePos = matchPos - 1;
+                    let twoCharBeforePos = matchPos - 2;
+                    if (twoCharBeforePos > 0 && oneCharBeforePos > 0) {
+                        // Need to quote if have sg like this:
+                        //   formatValue={(value) => \`\${(value) => < 10 ? \`0\${value}\` : value)}\`}
+                        // (ie: if patterns comes atfre and equals sime, but not =")
+                        // But no need to quote if:
+                        //    formatValue="{(value) => \`\${(value) => < 10 ? \`0\${value}\` : value)}\`}"
+                        //    <Timer.Days/>{this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelDays+" " : ', '}
+                        needsQuote =
+                            html.substring(twoCharBeforePos, twoCharBeforePos + 2) !== '="' &&
+                            html.substring(oneCharBeforePos, oneCharBeforePos + 1) === "=";
+                    }
+
+                    // If need to quote: replace patterns with quoted version also escaping some HTML entities
+                    if (needsQuote) {
+                        let replacement =
+                            '"{' +
+                            found[i]
+                                .replace("<", "&lt;")
+                                .replace(">", "&gt;")
+                                .replace("&", "&amp;")
+                            + '}"';
+                        html = html.replace(pattern, replacement);
+                        lastStartPos = matchPos + replacement.length;
+                    } else {
+                        lastStartPos = matchPos + pattern.length;
+                    }
+
+                    // No lastStartPos placed after the processed string
+                }
+            }
+            //console.log(html);
+            return html;
+        },
+
+//     quoteJsxExpresion(
+//         `
+// <Timer
+//   initialTime="{initialTime}"
+//   formatValue={(value) => \`\${(value) => < 10 ? \`0\${value}\` : value)}\`} direction={direction}
+//   formatValue2="{(value) => \`\${(value) => < 10 ? \`0\${value}\` : value)}\`}" direction="{direction}"
+//                         >
+//                         <span className="timer-days">
+//                             <Timer.Days/>{this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelDays+" " : ', '}
+//                         </span>
+//                         <span className="timer-hours">
+//                             <Timer.Hours/>{this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelHours+" " : ':'}
+//                         </span>
+//                             <span className="timer-minutes">
+//                             <Timer.Minutes/>{this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelMinutes+" " : ':'}
+//                         </span>
+//                             <span className="timer-seconds">
+//                             <Timer.Seconds/>{this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelSeconds : ''}
+//                         </span>
+//                         </Timer>
+// `
+//     );
+
+        /**
+         * Unquote attributes containg JSX previously quoted using quoteJsxExpresionsInAttributes
+         * @param html
+         */
+        unquoteJsxExpresionsInAttributes(html) {
+            let found = html.match(/=["']{.*}["']/g);
+            // console.log(html);
+            // console.log(found);
+            for (let i = 0; i < found.length; i++) {
+                let pattern = found[i];
+                let replacement = pattern.startsWith('="{')
+                    ? pattern.replace('"{', "{").replace('}"', "}")
+                    : pattern.replace("{'", "{").replace("}'", "}");
+                replacement = replacement
+                    .replace("&lt;", "<")
+                    .replace("&gt;", ">")
+                    .replace("&amp;", "&");
+                html = html.replace(pattern, replacement);
+            }
+            // console.log(html);
+            return html;
+        },
+
 
         /**
          * Parse style string to object
@@ -302,6 +410,7 @@ export default config => {
          * @param  {string} str HTML string
          * @param  {ParserCss} parserCss In case there is style tags inside HTML
          * @return {Object}
+         *
          */
         parse(str, parserCss) {
             console.log("html", str, parserCss);
@@ -310,7 +419,8 @@ export default config => {
             var config = (c.em && c.em.get('Config')) || {};
             var res = { html: '', css: '' };
 
-            const dom = nodeHtmlParser(str);
+            var quoted = this.quoteJsxExpresionsInAttributes(str);
+            const dom = nodeHtmlParser(quoted);
             var result = this.parseNode(dom);
 
             if (result.length == 1) result = result[0];

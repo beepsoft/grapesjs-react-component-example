@@ -25,7 +25,7 @@ const App: React.FC = () => {
     return (
         <>
             <GEditor id="geditor" plugins={[timerPluginRef]}/>
-            <TemplateDisplay htmlString={htmlString} cssString={cssString} />
+            <TemplateDisplay jsxString={htmlString} cssString={cssString} />
         </>
     );
 }
