@@ -2,6 +2,17 @@ import React, {useEffect, useState} from 'react';
 import { Style } from "react-style-tag";
 import JsxParser from "react-jsx-parser";
 import Timer from "react-compound-timer";
+import styled from 'styled-components';
+
+const Prompt = styled.div`
+    font-size: 1.5em
+`;
+const LiveTemplate = styled.div`
+    margin: 20px;
+    padding: 20px;
+    border: ${props => !props.jsxString ? 'dashed black' : 'none'};
+    };
+`;
 
 /**
  * Display a react com
@@ -10,8 +21,16 @@ import Timer from "react-compound-timer";
  * @constructor
  */
 const TemplateDisplay = ({jsxString, cssString}) => {
+    console.log("jsxString", jsxString);
+    if (!jsxString) {
+        return (
+            <LiveTemplate jsxString={jsxString}>
+                <Prompt>Press the <span className='fa fa-bell'></span> bell icon in the editor's toolbar to copy the template HTML/JSX here to have a live version of it!</Prompt>
+            </LiveTemplate>
+        );
+    }
     return (
-        <>
+        <LiveTemplate jsxString={jsxString}>
             <Style>{cssString}</Style>
             <JsxParser components={{Timer}} jsx={jsxString} bindings={
                 {
@@ -19,7 +38,7 @@ const TemplateDisplay = ({jsxString, cssString}) => {
                     formatValue: (value) => `${(value < 10 ? `0${value}` : value)}`
                 }
             }/>
-        </>
+        </LiveTemplate>
     );
 }
 
