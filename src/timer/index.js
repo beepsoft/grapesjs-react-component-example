@@ -10,6 +10,7 @@ import loadBlocks from './blocks';
 import loadCommands from './commands';
 import loadPanels from './panels';
 import parserHtmlCaseSensitive from './ParserHtmlCaseSensitive';
+import parserHtmlOrig from './ParserHtmlOrig';
 
 import {
     timerRef,
@@ -89,12 +90,23 @@ export default function addTimerPlugin(setHtmlString, setCssString) {
         // This needs to be handset (in GrapesJS it comes from parser/config/config.js)
         emConf.textTags = ['br', 'b', 'i', 'u', 'a', 'ul', 'ol'];
         em.get('Parser').parserHtml = parserHtmlCaseSensitive(emConf);
+        //em.get('Parser').parserHtml = parserHtmlOrig(emConf);
         em.get('Parser').parseHtml = (str) => {
             const pHtml = em.get('Parser').parserHtml;
             //pHtml.compTypes = em ? em.get('DomComponents').getTypes() : compTypes;
             pHtml.compTypes = em.get('DomComponents').getTypes();
-            return pHtml.parse(str, em.get('Parser').parserCss);
+            let res = pHtml.parse(str, em.get('Parser').parserCss);
+            console.log("XXX res", res);
+            return res;
         };
+
+        // Show the blocks panel by default
+        editor.on("load", () => {
+            const openBl = editor.Panels.getButton('views', 'open-blocks');
+            openBl && openBl.set('active', 1);
+            //editor.runCommand('open-blocks');
+        });
+
     });
 }
 

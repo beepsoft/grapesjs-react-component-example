@@ -1,13 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import GrapesJS from 'grapesjs';
 import {GEditor, GrapesPluginType} from "grapesjs-react";
 import 'grapesjs/dist/css/grapes.min.css';
 import {timerPluginRef} from "./timer/consts";
 import addTimerPlugin from './timer';
 import TemplateDisplay from "./templateDisplay";
-import Timer from "react-compound-timer";
-
-
 
 const App: React.FC = () => {
 
