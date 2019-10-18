@@ -214,8 +214,8 @@ them. All in all the final template for the Timer component looks like this:
 
 So now we have a block, which can be dragged onto the canvas, it displays our component and can generate a JSX of 
 itself (well, actually it can be any JSX one adds using `comps.add()`). Now we need a way to load this template, which is
-provided by `[editor.getHtml()](https://grapesjs.com/docs/api/editor.html#gethtml)` and 
-`[editor.getCss()](https://grapesjs.com/docs/api/editor.html#getcss)` as a string and make it work as an actual 
+provided by [`editor.getHtml()`](https://grapesjs.com/docs/api/editor.html#gethtml) and 
+[`editor.getCss()`](https://grapesjs.com/docs/api/editor.html#getcss) as a string and make it work as an actual 
 React component.
 
 For this I implemented [TemplateDisplay](src/templateDisplay/index.tsx). It uses two cool React packages:
