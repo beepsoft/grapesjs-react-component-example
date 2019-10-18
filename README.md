@@ -66,7 +66,7 @@ onRender({el}) {
 }	
 ```
 
-The `editor.getHtml()` will return something like:
+The [`editor.getHtml()`](https://grapesjs.com/docs/api/editor.html#gethtml) will return something like:
 ```
 <div id="i0g38s">
     <div>
@@ -81,9 +81,9 @@ sensitive and React components must start with an [uppercase character](https://
 When `comps.add(...)` is called GrapesJS checks whether the parameter is a string or an object. If it is an object,
 than it is expected to have the Component Definition format. If it is a string then GrapesJS uses an HTML parser 
 (`ParserHtml.js`) to convert the HTML string into the Component Definition format. This, as mentioned above, uses the
-browser own DOM and hence everything gets lowercased.
+browser's own DOM and hence everything gets lowercased.
 
-To work around I had to define my own [HTML parser](src/timer/ParserHtmlCaseSensitive.js) and replace the built in one 
+To work around it I had to define my own [HTML parser](src/timer/ParserHtmlCaseSensitive.js) and replace the built in one 
 with that. (_As there seems to be no public API to provide a custom HTML parser the replacement of the built-in parser
 is a bit hackish, see [src/timer/index.js](src/timer/index.js). Anyway, it works._) This implementation uses
 [node-html-parser](https://www.npmjs.com/package/node-html-parser) and is based on the original `ParserHtml.js`, so it more or less
@@ -213,14 +213,16 @@ them. All in all the final template for the Timer component looks like this:
 ## 🖥️ A way to display the JSX template as an actual React component
 
 So now we have a block, which can be dragged onto the canvas, it displays our component and can generate a JSX of 
-itself (well, actually it can be any JSX one adds as comps.add()). Now we need a way to load this template, which is
-provided by `editor.getHtml()` and `editor.getCss()` as a string and make it work as an actual React component.
+itself (well, actually it can be any JSX one adds using `comps.add()`). Now we need a way to load this template, which is
+provided by `[editor.getHtml()](https://grapesjs.com/docs/api/editor.html#gethtml)` and 
+`[editor.getCss()](https://grapesjs.com/docs/api/editor.html#getcss)` as a string and make it work as an actual 
+React component.
 
 For this I implemented [TemplateDisplay](src/templateDisplay/index.tsx). It uses two cool React packages:
 - [react-jsx-parser](https://www.npmjs.com/package/react-jsx-parser): it is a React component which can parse JSX and 
-output rendered React Components. The thing with JSX is that it is not actually HTML and cannot be not used right away 
+output rendered React Components. The thing with JSX is that it is not actually HTML and cannot be used right away 
 in the browser's DOM, but needs to be compiled to React components (usually done by webpack), which are then used by 
-the React engine to do all the magic with virtual DOM. `react-jsx-parser` allows compilation of JSX on-the-fly on any
+the React engine to do all the magic with virtual DOM. `react-jsx-parser` allows compilation of JSX on-the-fly for any
 string passed to it.
 - [react-style-tag](https://www.npmjs.com/package/): allows adding any CSS to React like this: 
 `<Style>{cssString}</Style>`. So, this is practically does the same for CSS as `react-jsx-parser` for JSX: makes the
@@ -229,7 +231,7 @@ CSS available to React provided as a string.
 In the app whenever you press the bell icon the template (which can also be viewed by pressing the </> button) will be
 passed to `TemplateDisplay` and will display the same content that has been edited in the editor.
 
-### Some adjustment to the JSX before passing to TemplateDisplay
+### 🛠️ Some adjustment to the JSX before passing to TemplateDisplay
 
 As described earlier JSX expressions in attributes are surrounded by quotes to make them look like actual HTML
 attributes. For `react-jsx-parser` to actually use those expressions these quotes have to be removed first. 
@@ -243,7 +245,8 @@ One more thing needs to noted. When the Timer's React component is generated the
    initialTime={initialTime}
    direction={direction}
    formatValue={(value) => `${(value < 10 ? `0${value}` : value)}`}
->```
+>
+```
 
 however in the component definition JSX we have
 
@@ -288,7 +291,7 @@ To have "live" react components in GrapseJS I need to work around a couple of th
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Running the example
+## 🏃‍♀️ ️Running the example
 
 ```
 yarn i
