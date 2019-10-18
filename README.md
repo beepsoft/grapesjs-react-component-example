@@ -1,6 +1,6 @@
 
 # 🤔Why?🤔
-A regular question regarding [GrapseJS](https://grapesjs.com/) - the wonderful HTML layout editor written in Javascript - 
+A regular question regarding [GrapesJS](https://grapesjs.com/) - the wonderful HTML layout editor written in Javascript - 
 is how to integrate it with React components:
 
 https://github.com/artf/grapesjs/issues/1970
@@ -9,7 +9,7 @@ As no solution has been provided for this so far I started a little experiment t
 
 # 🐒What?🐒
 Although _"integrating with React"_ could mean many things here's the use case I tried to solve:
-- Have a GrapseJS [block](https://grapesjs.com/docs/modules/Blocks.html), which when dragged onto the [canvas](https://grapesjs.com/docs/api/canvas.html) uses a React component to display the content in the canvas.
+- Have a GrapesJS [block](https://grapesjs.com/docs/modules/Blocks.html), which when dragged onto the [canvas](https://grapesjs.com/docs/api/canvas.html) uses a React component to display the content in the canvas.
 - Have the same [component](https://grapesjs.com/docs/modules/Components.html#how-components-work) generate JSX code of 
 itself in the final template.
 - Have a way to get the GrapesJS generated JSX/CSS as text and make it live again by loading the JSX/CSS text into a React 
@@ -22,10 +22,10 @@ My concrete plan was to implement something like
 
 # 🚀How?🚀
 
-## 🍇 A GrapseJS plugin, block, component (and trait, button, command)
+## 🍇 A GrapesJS plugin, block, component (and trait, button, command)
 
 To display a React component in the canvas I needed a [plugin](src/timer/index.js),
-which provides a GrapseJS [component](src/timer/components.jsx). This component implements `ComponentsView`'s 
+which provides a GrapesJS [component](src/timer/components.jsx). This component implements `ComponentsView`'s 
 `onRender` function. This is practically needs to be something like:
 
 ```
@@ -42,7 +42,7 @@ onRender({el}) {
 
 ## 🔍 A custom HTML parser
 
-To have the same JSX generated into the GrapseJS template is a bit tricky because GrapesJS is a HTML5 editor and 
+To have the same JSX generated into the GrapesJS template is a bit tricky because GrapesJS is a HTML5 editor and 
 uses the browser's DOM to parse whatever is added to its component model. A component can be added to the model either
 as an object (a [Component Definition](https://grapesjs.com/docs/modules/Components.html#how-components-work)) or HTML. 
 HTML is the natural way, however because it is handled as HTML5 all tag and attribute names will be
@@ -80,7 +80,7 @@ sensitive and React components must start with an [uppercase character](https://
 
 When `comps.add(...)` is called GrapesJS checks whether the parameter is a string or an object. If it is an object,
 than it is expected to have the Component Definition format. If it is a string then GrapesJS uses an HTML parser 
-(`ParserHtml.js`) to convert the HTML string into the Component Definition format. This, as mentioned above, uses the
+([`ParserHtml.js`](https://github.com/artf/grapesjs/blob/dev/src/parser/model/ParserHtml.js)) to convert the HTML string into the Component Definition format. This, as mentioned above, uses the
 browser's own DOM and hence everything gets lowercased.
 
 To work around it I had to define my own [HTML parser](src/timer/ParserHtmlCaseSensitive.js) and replace the built in one 
@@ -224,7 +224,7 @@ output rendered React Components. The thing with JSX is that it is not actually 
 in the browser's DOM, but needs to be compiled to React components (usually done by webpack), which are then used by 
 the React engine to do all the magic with virtual DOM. `react-jsx-parser` allows compilation of JSX on-the-fly for any
 string passed to it.
-- [react-style-tag](https://www.npmjs.com/package/): allows adding any CSS to React like this: 
+- [react-style-tag](https://www.npmjs.com/package/react-style-tag): allows adding any CSS to React like this: 
 `<Style>{cssString}</Style>`. So, this is practically does the same for CSS as `react-jsx-parser` for JSX: makes the
 CSS available to React provided as a string.
 
@@ -235,7 +235,7 @@ passed to `TemplateDisplay` and will display the same content that has been edit
 
 As described earlier JSX expressions in attributes are surrounded by quotes to make them look like actual HTML
 attributes. For `react-jsx-parser` to actually use those expressions these quotes have to be removed first. 
-So, before actually passing the JSX to TemplateDisplay in [commands.js](commands.js) we call 
+So, before actually passing the JSX to TemplateDisplay in [commands.js](src/timer/commands.js) we call  
 `unquoteJsxExpresionsInAttributes()` on the template. This will result in an actual JSX with expressions and all.
 
 One more thing needs to noted. When the Timer's React component is generated the Timer is configured like this:
@@ -278,23 +278,14 @@ and this now can be called from the JSX template component:
 }/>
 ``` 
 
-
-
-There's one kind of React integration of GrapseJS available today 
-([grapesjs-react](https://github.com/thanhtunguet/grapesjs-react)), which provides a react wrapper for it:
-
-I use this to integrate GrapseJS into the app.
-
-To have "live" react components in GrapseJS I need to work around a couple of things:
-
-
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
 ## 🏃‍♀️ ️Running the example
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app). To run it:
 
 ```
 yarn i
+```
+```
 yarn start
 ```
 
