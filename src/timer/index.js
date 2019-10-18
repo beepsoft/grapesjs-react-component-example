@@ -18,9 +18,7 @@ import {
 } from './consts';
 
 export default function addTimerPlugin(setHtmlString, setCssString) {
-    console.log('grapesjs.plugins', grapesjs.plugins);
     grapesjs.plugins.add(timerPluginRef, (editor, opts = {}) => {
-        console.log('plugins.add', editor);
         let c = opts;
 
         let defaults = {
@@ -96,7 +94,6 @@ export default function addTimerPlugin(setHtmlString, setCssString) {
             //pHtml.compTypes = em ? em.get('DomComponents').getTypes() : compTypes;
             pHtml.compTypes = em.get('DomComponents').getTypes();
             let res = pHtml.parse(str, em.get('Parser').parserCss);
-            console.log("XXX res", res);
             return res;
         };
 

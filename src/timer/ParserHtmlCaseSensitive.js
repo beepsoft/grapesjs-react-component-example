@@ -124,7 +124,6 @@ export default config => {
                     // No lastStartPos placed after the processed string
                 }
             }
-            //console.log(html);
             return html;
         },
 
@@ -160,8 +159,6 @@ export default config => {
             if (!found) {
                 return html;
             }
-            // console.log(html);
-            // console.log(found);
             for (let i = 0; i < found.length; i++) {
                 let pattern = found[i];
                 let replacement = pattern.startsWith('="{')
@@ -173,7 +170,6 @@ export default config => {
                     .replace("&amp;", "&");
                 html = html.replace(pattern, replacement);
             }
-            // console.log(html);
             return html;
         },
 
@@ -421,7 +417,6 @@ export default config => {
          */
         parse(str, parserCss) {
             console.log("html", str, parserCss);
-            console.log("html", str);
 
             var config = (c.em && c.em.get('Config')) || {};
             var res = { html: '', css: '' };
@@ -434,7 +429,6 @@ export default config => {
                 wrappedInDiv = true;
             }
             const dom = nodeHtmlParser(quoted);
-            console.log("dom", dom);
             var result = this.parseNode(dom);
 
             if (result.length == 1) {
@@ -473,7 +467,6 @@ export default config => {
                 if (styleStr) res.css = parserCss.parse(styleStr);
             }
 
-            console.log("parsed html", res);
             return res;
         }
     };

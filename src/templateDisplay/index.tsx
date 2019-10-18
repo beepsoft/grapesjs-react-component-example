@@ -21,7 +21,6 @@ const LiveTemplate = styled.div`
  * @constructor
  */
 const TemplateDisplay = ({jsxString, cssString}) => {
-    console.log("jsxString", jsxString);
     if (!jsxString) {
         return (
             <LiveTemplate jsxString={jsxString}>

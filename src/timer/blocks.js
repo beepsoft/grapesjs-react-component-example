@@ -50,7 +50,6 @@ export default function (editor, opt = {}) {
     }
   </style>` : '';
 
-    console.log("bm", bm);
     bm.remove(timerRef);
     // if (c.blocks.indexOf(timerRef) >= 0) {
     bm.add(timerRef, {

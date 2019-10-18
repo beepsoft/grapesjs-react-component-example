@@ -161,9 +161,6 @@ export default config => {
                     const nodeName = attrs[j].nodeName;
                     let nodeValue = attrs[j].nodeValue;
 
-                    console.log("XXX nodeName", nodeName);
-                    console.log("XXX nodeValue", nodeValue);
-
                     // Isolate attributes
                     if (nodeName == 'style') {
                         model.style = this.parseStyle(nodeValue);
