@@ -22,6 +22,8 @@ export default function addTimerPlugin(setHtmlString, setCssString) {
         let c = opts;
 
         let defaults = {
+            log: ['debug'],
+
             blocks: [timerRef],
 
             // Label in block

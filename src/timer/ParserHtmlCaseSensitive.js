@@ -350,11 +350,11 @@ export default config => {
                 }
 
                 // Check if it's a text node and if could be moved to the prevous model
-                if (model.type == 'textnode') {
+                if (model.type == 'textnode' || model.type == 'ReactTextNode') {
                     // this had to be added ...
                     model.content = node.nodeValue;
 
-                    if (nodePrev && nodePrev.type == 'textnode') {
+                    if (nodePrev && nodePrev.type == model.type) {
                         nodePrev.content += model.content;
                         continue;
                     }
@@ -380,14 +380,14 @@ export default config => {
                         const cType = comp.type;
 
                         if (
-                            ['text', 'textnode'].indexOf(cType) < 0 &&
+                            ['text', 'textnode', 'ReactTextNode'].indexOf(cType) < 0 &&
                             c.textTags.indexOf(comp.tagName) < 0
                         ) {
                             allTxt = 0;
                             break;
                         }
 
-                        if (cType == 'textnode') {
+                        if (cType == 'textnode' || cType == 'ReactTextNode') {
                             foundTextNode = 1;
                         }
                     }
@@ -398,7 +398,7 @@ export default config => {
                 }
 
                 // If tagName is still empty and is not a textnode, do not push it
-                if (!model.tagName && model.type != 'textnode') {
+                if (!model.tagName && model.type != 'textnode' && model.type != 'ReactTextNode') {
                     continue;
                 }
 
@@ -466,6 +466,7 @@ export default config => {
 
                 if (styleStr) res.css = parserCss.parse(styleStr);
             }
+            console.log("res", res);
 
             return res;
         }

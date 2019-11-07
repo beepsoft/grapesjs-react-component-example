@@ -1,36 +1,180 @@
 /**
  *
- * This is the Timer grapesjs component, which generates JSX for its template representation and uses
- * a react component (react-compound-timer) to display the actual live Timer.
  *
- * The main trick here is that onRender() time we mount the actual react component onto the html that grapesjs uses
- * to represent our component (this is <div class="timer" data-gjs-type="${timerRef}"></div> as defines in blocks.js).
- *
- * Also, the component's model is represented as JSX, in this example a simplified version of the <Timer/> component.
- *
- * This example also includes traits for editing the live Timer's properties:
- * - startFrom: by default the timer will count forward. If startFrom is set it will start backwards from that date
- * - timerLabel: the label to display in front of the timer
- * - displayLabels: if unchecked displays time as 19, 22:10:15. If checked: 19 days 20 hours 10 minutes 15 seconds.
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Timer from 'react-compound-timer';
 import {timerRef} from "./consts";
 
-export default function (editor, opt = {}) {
-    const c = opt;
+// This ain't nice yet: we have this global to mark that we are inside a react component and so builtin HTML components
+// should be handled by ReactDefaultType
+let inReactComponent = false;
+
+export function addReactComponent(editor, reactComponent, opts = {}) {
     const domc = editor.DomComponents;
-    const defaultType = domc.getType('default');
-    const defaultModel = defaultType.model;
-    const defaultView = defaultType.view;
+    let reactType = domc.getType('default');
+    let reactModel = reactType.model;
+    let reactView = reactType.view;
+    const config = opts;
+
+    domc.addType(opts.tagName, {
+        model: reactModel.extend(
+            {
+                defaults: {
+                    ...reactModel.prototype.defaults,
+                    tagName: config.tagName,
+                    reactComponent: reactComponent
+                }
+            },
+            {
+                isComponent(el) {
+                    if (typeof el.tagName !== 'undefined') {
+                        // Otherwise it is a react compo if tagName matches preset tagName
+                        if (el.tagName == config.tagName) {
+                            inReactComponent = true;
+                            // TODO: when to set inReactComponent to false?
+                            return {
+                                type: config.tagName
+                            }
+                        }
+                    }
+
+                    if (inReactComponent) {
+                        let type = null;
+                        if (el.tagName) {
+                            type = domc.getType(el.tagName);
+                            if (!type) {
+                                return {
+                                    type: "ReactDefaultType"
+                                }
+
+                            }
+                        }
+                        // May handle textnodes here, but doesn't seem necessary
+                        // else {
+                        //     return {
+                        //         //type: "ReactTextNode"
+                        //         type: "textnode"
+                        //     }
+                        // }
+                    }
+
+                },
+
+                updated(property, value, prevValue) {
+                    debugger;
+                },
+
+            }
+        ),
+        view: reactView.extend({
+            reactRender(parentChildren) {
+
+                // debugger;
+                //Now this needs to generate top level react node, then render children passing the 'children' array!
+                const { id, model, el, opts } = this;
+
+                let myChildren = new Array();
+                const compos = model.components();
+                const dt = opts.componentTypes;
+
+                // Render children first
+                compos.each(model => {
+
+                    let type = model.get('type');
+                    // For textnodes force rendering using ReactTextNode
+                    if (type == 'textnode') {
+                        type = 'ReactTextNode';
+                    }
+                    let viewObject =  null;
+
+                    // Find view for the model
+                    for (let it = 0; it < dt.length; it++) {
+                        if (dt[it].id == type) {
+                            viewObject = dt[it].view;
+                            break;
+                        }
+                    }
+
+                    // TODO: Backbone always creates a HTML element at this point no matter what
+                    // but we will simply not use it. Still it may effect performance a bit.
+                    const view = new viewObject({
+                        model,
+                        opts,
+                        componentTypes: dt
+                    });
+
+                    // Render the element by adding it to myChildren
+                    view.reactRender(myChildren)
+                });
+
+                // In case it is a text node it will be the element itself, otherwise either a
+                // custom react component (from model.attributes.reactComponent) or jsut the name of
+                // a default HTML element.
+                const reactEl =
+                    model.attributes.content
+                    ? model.attributes.content
+                    : React.createElement(
+                    model.attributes.reactComponent
+                        ? model.attributes.reactComponent
+                        : model.attributes.tagName, // default html tag or text node
+                        model.getAttributes(),
+                   myChildren
+                );
+
+                // If parentChildren has been provided, then this component is a child react compo, so add to
+                // parentChildren. Otherwise this is the root react component and needs to actually render to the DOM
+                if (parentChildren) {
+                    parentChildren.push(reactEl);
+                }
+                else {
+                    ReactDOM.render(reactEl, el);
+                }
+
+                return this;
+            },
+
+            // Default render is called for the top level react element. We just delegate to this.reactRender()
+            render() {
+                //inReactComponent = true;
+                this.reactRender(null);
+                inReactComponent = false;
+                return this;
+            }
+
+        })
+    });
+}
+
+// Add react components including the ReactDefaultType for the default html elements
+export default function addComponents(editor, opts = {}) {
+
+    // Component for rendering text nodes as react element
+    addReactComponent(editor, null, {...opts, tagName: 'ReactTextNode'});
+
+    // Generic renderer for builtin HTML elements
+    addReactComponent(editor, null, {...opts, tagName: 'ReactDefaultType'});
+
+    // Specific components
+    addReactComponent(editor, Timer, {...opts, tagName: 'Timer'});
+    addReactComponent(editor, Timer.Days, {...opts, tagName: 'Timer.Days'});
+    addReactComponent(editor, Timer.Hours, {...opts, tagName: 'Timer.Hours'});
+    addReactComponent(editor, Timer.Minutes, {...opts, tagName: 'Timer.Minutes'});
+    addReactComponent(editor, Timer.Seconds, {...opts, tagName: 'Timer.Seconds'});
+
+    const domc = editor.DomComponents;
+    const defaultReactType = domc.getType('ReactDefaultType');
+    const defaultReactModel = defaultReactType.model;
+    const defaultReactView = defaultReactType.view;
+    const c = opts;
     const pfx = c.timerClsPfx;
 
     domc.addType(timerRef, {
 
-        model: defaultModel.extend({
+        model: defaultReactModel.extend({
             defaults: {
-                ...defaultModel.prototype.defaults,
+                ...defaultReactModel.prototype.defaults,
                 startFrom: c.startTime,
                 timerLabel: c.timerLabel,
                 displayLabels: c.displayLabels,
@@ -42,16 +186,17 @@ export default function (editor, opt = {}) {
                 },
                 droppable: false,
                 traits: [{
-                    label: 'Start',
+                    label: 'Start (won\'t work for now)',
                     name: 'startFrom',
                     changeProp: 1,
+
                     type: 'datetime-local', // can be 'date'
                 }, {
-                    label: 'Label',
+                    label: 'Label (won\'t work for now)',
                     name: 'timerLabel',
                     changeProp: 1,
                 }, {
-                    label: 'Display labels',
+                    label: 'Display labels (won\'t work for now)',
                     name: 'displayLabels',
                     type: 'checkbox',
                     changeProp: 1,
@@ -60,9 +205,9 @@ export default function (editor, opt = {}) {
         }, {
             isComponent(el) {
                 //console.log('isComponent', el);
-                //debugger;
+                // debugger;
                 if ((el.getAttribute && el.getAttribute('data-gjs-type') == timerRef)
-                || (el.attributes && el.attributes['data-gjs-type'] == timerRef)) {
+                    || (el.attributes && el.attributes['data-gjs-type'] == timerRef)) {
                     return {
                         type: timerRef
                     };
@@ -71,23 +216,24 @@ export default function (editor, opt = {}) {
         }),
 
 
-        view: defaultView.extend({
+        view: defaultReactView.extend({
             // Listen to changes of startFrom, timerLabel or displayLabels managed by the traits
             init() {
-                this.listenTo(this.model, 'change:startFrom change:timerLabel change:displayLabels', this.handleChanges);
+                // Ignore trait handling for now
+                //this.listenTo(this.model, 'change:startFrom change:timerLabel change:displayLabels', this.handleChanges);
+
+                // Also, keep the initial components for now, don't reset every time with the default component structure.
+                const comps = this.model.get('components');
+                if (!comps.length) {
+                    this.updateComponents();
+                }
             },
 
-            // Called whenever startFrom, timerLabel or displayLabels changes
-            handleChanges(e) {
-                /// Force rerender
-                // Make sure we start react from scratch for el
-                ReactDOM.unmountComponentAtNode(this.el);
-                this.render();
-            },
-
-            onRender({el}) {
+            updateComponents()
+            {
                 // Calc initialTime. If startFrom is set in the trait, then calculate, otherwise leave it 0
                 let initialTime = 0;
+                const el = this.el;
 
                 // Initially show timer proceeding forward
                 let direction = 'forward';
@@ -101,55 +247,15 @@ export default function (editor, opt = {}) {
                     direction = 'backward';
                 }
 
-                // Update the component in the model, ie: this will be the actuall html content of the editor (stored
-                // under 'gjs-html' key on localStorage)
-                // Note: if startFrom has been set at this point grapesjs will also save its value in the local storage
-                // at the 'gjs-components' key along with the timer component's other values.
-                // Ie. it will look like this:
-                // "components": [
-                //     {
-                //         "type": "timer",
-                //         "content": "",
-                //         "classes": [
-                //             {
-                //                 "name": "timer",
-                //                 "label": "timer",
-                //                 "type": 1,
-                //                 "active": true,
-                //                 "private": false,
-                //                 "protected": false
-                //             }
-                //         ],
-                //         "startFrom": "2019-10-31",
-                //         "components": [
-                //             {
-                //                 "tagName": "timer",
-                //                 "content": "",
-                //                 "attributes": {
-                //                     "initialtime": "1688547182"
-                //                 }
-                //             }
-                //         ]
-                //     }
-                // ]
-                //
-                // And the matching 'gjs-html' will have:
-                // <timer initialtime="1688547182"></timer>
-
-                //
-                // Add practically the same JSX as the component. Note: the only real difference is that formatValue
-                // attruibute calls a "formatValue" function that will be provided by the JsxParser (with the same
-                // function as in the react component below.
-                //
                 const comps = this.model.get('components');
                 comps.reset();
-                comps.add(`<span className="timer-label">${this.model.attributes.timerLabel}</span>`);
+
+//                            formatValue={formatValue}
                 const compString =
                     `<Timer
                             `+(direction=="backward" ? `initialTime="${initialTime}"` : "")+`
                             direction="${direction}"
-                            formatValue={formatValue}
-                        >
+                        >AAAAA BBBB 
                         <span className="timer-days">
                             <Timer.Days/>${this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelDays+" " : ', '}
                         </span>
@@ -162,44 +268,25 @@ export default function (editor, opt = {}) {
                             <span className="timer-seconds">
                             <Timer.Seconds/>${this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelSeconds : ''}
                         </span>
-                        </Timer>`;
+                        </Timer> CCCC DDDD`;
                 comps.add(compString);
 
-                // And this will be the "live" view of the timer. How this live view relates to the actual
-                // JSQ generated as the component is left to you. In theory the same JSX that is generated here below
-                // could be used as a string as the component html above. For now we have this complex view and a simple
-                // <Timer initialTime="..."/> as the component.
-                // Note: 'this' references the current Backbone.View and all its features can be used in the JSX. For
-                // now we generate the labels previously stored as "attributes"
-                ReactDOM.render(
-                    <>
-                        {this.model.attributes.timerLabel != ""
-                            ?
-                                <span className="timer-label">{this.model.attributes.timerLabel}: </span>
-                            : ""}
-                        <Timer
-                            initialTime={initialTime}
-                            direction={direction}
-                            formatValue={(value) => `${(value < 10 ? `0${value}` : value)}`}
-                        >
-                        <span className="timer-days">
-                            <Timer.Days/>{this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelDays+" " : ', '}
-                        </span>
-                        <span className="timer-hours">
-                            <Timer.Hours/>{this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelHours+" " : ':'}
-                        </span>
-                            <span className="timer-minutes">
-                            <Timer.Minutes/>{this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelMinutes+" " : ':'}
-                        </span>
-                            <span className="timer-seconds">
-                            <Timer.Seconds/>{this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelSeconds : ''}
-                        </span>
-                        </Timer>
-                    </>
-                    , el);
             },
 
+            // Called whenever startFrom, timerLabel or displayLabels changes
+            handleChanges(e) {
+                /// Force rerender
+                // Make sure we start react from scratch for el
+                ReactDOM.unmountComponentAtNode(this.el);
+                this.updateComponents();
+                this.render();
+            },
+
+            // Using addReactComponent()'s render()
         }),
     });
+
+
+
 }
 

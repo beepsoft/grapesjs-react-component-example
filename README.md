@@ -1,3 +1,22 @@
+#THIS IS A WIP
+
+Experiments with 1:1 mapping of grapesjs components to react components
+
+addReactComponent() can be used to define the mapping of a react 
+component to  grapesjs component. This seems to be OK for now.
+
+Setting react components attributes via traits based on propTypes is
+not handled and it probably won't happen automatically and will need 
+some config from the block implementor.
+
+
+Dragging elements inside the Timer component works but the Timer
+component in the canvas is not updated automtacially, need to
+reload the page of this for now. I would need some on(...) even to
+catch when Timer elements are moved in the Layer Manager so that I
+could unmount the component and rerender the canvas.
+
+---------------------
 
 # 🤔Why?🤔
 A regular question regarding [GrapesJS](https://grapesjs.com/) - the wonderful HTML layout editor written in Javascript - 
