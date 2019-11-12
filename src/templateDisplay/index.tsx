@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import { Style } from "react-style-tag";
 import JsxParser from "react-jsx-parser";
-import Timer from "react-compound-timer";
+// import Timer from "react-compound-timer";
+import ReactCardPreview from "react-card-preview";
 import styled from 'styled-components';
 
 const Prompt = styled.div`
@@ -31,7 +32,7 @@ const TemplateDisplay = ({jsxString, cssString}) => {
     return (
         <LiveTemplate jsxString={jsxString}>
             <Style>{cssString}</Style>
-            <JsxParser components={{Timer}} jsx={jsxString} bindings={
+            <JsxParser components={{ReactCardPreview}} jsx={jsxString} bindings={
                 {
                     // This is called from the formatValue attribute of the Timer coming in htmlString
                     formatValue: (value) => `${(value < 10 ? `0${value}` : value)}`

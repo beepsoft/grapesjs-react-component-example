@@ -12,6 +12,7 @@
     "grapesjs-react": "2.0.2",
     "node-html-parser": "^1.1.16",
     "react": "^16.10.2",
+    "react-card-preview": "^1.0.0",
     "react-compound-timer": "^1.1.15",
     "react-dom": "^16.10.2",
     "react-jsx-parser": "^1.19.1",
