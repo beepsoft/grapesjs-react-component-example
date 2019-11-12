@@ -89,7 +89,7 @@ export default function (editor, opt = {}) {
                         secondary: { main: "#000" }
                     },
                     status: {
-                        danger: "orange"
+                        danger: "yellow"
                     }
                 });
                 //
