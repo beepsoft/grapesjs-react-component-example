@@ -8,6 +8,9 @@ import addTimerPlugin from './timer';
 import {cardPluginRef} from "./card/consts";
 import addCardPlugin from './card';
 
+import {listPluginRef} from "./list/consts";
+import addListPlugin from './list';
+
 import TemplateDisplay from "./templateDisplay";
 
 const App: React.FC = () => {
@@ -22,13 +25,13 @@ const App: React.FC = () => {
         // addTimerPlugin(setHtmlString, setCssString);
         addCardPlugin();
         addTimerPlugin();
-        // addListPlugin();
+        addListPlugin();
         setPluginLoaded(true);
     }
 
     return (
         <>
-            <GEditor id="geditor" plugins={[timerPluginRef, cardPluginRef]}/>
+            <GEditor id="geditor" plugins={[timerPluginRef, cardPluginRef, listPluginRef]}/>
             <TemplateDisplay jsxString={htmlString} cssString={cssString} />
         </>
     );

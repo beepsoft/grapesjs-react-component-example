@@ -25,7 +25,7 @@ My concrete plan was to implement something like
 # 🚀How?🚀
 
 ## 🍇 A GrapesJS plugin, block, component (and trait, button, command)
-
+																																													
 To display a React component in the canvas I needed a [plugin](src/timer/index.js),
 which provides a GrapesJS [component](src/timer/components.jsx). This component implements `ComponentsView`'s 
 `onRender` function. This is practically needs to be something like:
