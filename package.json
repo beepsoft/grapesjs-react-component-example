@@ -5,11 +5,10 @@
   "dependencies": {
     "@types/jest": "24.0.18",
     "@types/node": "12.7.12",
-    "@types/react": "16.9.5",
+    "@types/react": "^16.9.17",
     "@types/react-dom": "16.9.1",
     "beautiful-dom": "^1.0.7",
     "grapesjs": "0.15.8",
-    "grapesjs-react": "2.0.2",
     "node-html-parser": "^1.1.16",
     "react": "^16.10.2",
     "react-compound-timer": "^1.1.15",
@@ -20,7 +19,9 @@
     "styled-components": "^4.4.0",
     "typescript": "3.6.4",
     "underscore": "^1.9.1",
-    "xregexp": "^4.2.4"
+    "xregexp": "^4.2.4",
+    "grapesjs-preset-webpage": "^0.1.10",
+    "grapesjs-blocks-basic": "^0.1.8"
   },
   "scripts": {
     "start": "react-scripts start",
