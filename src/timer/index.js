@@ -18,6 +18,8 @@ import {
 } from './consts';
 
 export default function addTimerPlugin(setHtmlString, setCssString) {
+    console.log(addTimerPlugin, [timerPluginRef, setHtmlString, setCssString]);
+    debugger;
     grapesjs.plugins.add(timerPluginRef, (editor, opts = {}) => {
         let c = opts;
 
