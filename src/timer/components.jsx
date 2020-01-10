@@ -255,7 +255,7 @@ export default function addComponents(editor, opts = {}) {
                     `<Timer
                             `+(direction=="backward" ? `initialTime="${initialTime}"` : "")+`
                             direction="${direction}"
-                        >AAAAA BBBB 
+                        >
                         <span className="timer-days">
                             <Timer.Days/>${this.model.attributes.displayLabels ? " "+this.model.attributes.labels.labelDays+" " : ', '}
                         </span>
