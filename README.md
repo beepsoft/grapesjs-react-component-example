@@ -1,3 +1,15 @@
+# THIS CODE IS OUTDATED. USE THIS EXAMPLE INSTEAD:
+
+https://codesandbox.io/s/grapesjs-react-components-n6sff
+
+Also availble here:
+
+https://github.com/beepsoft/grapesjs-react-components-by-artf
+
+
+
+---------------------------------------------------------------------------------------------------
+
 
 # 🤔Why?🤔
 A regular question regarding [GrapesJS](https://grapesjs.com/) - the wonderful HTML layout editor written in Javascript - 
